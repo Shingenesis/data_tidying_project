@@ -5,6 +5,13 @@ date: "1/1/2020"
 output: html_document
 ---
 
+# Introduction
+
+This project is an exercise of many of the skills needed for succesfully fuifill the data tyding part of a data science project.
+
+### Loading the packages
+
+In the next data chunk the necessary packages are loaded.
 
 ```{r setup, include=FALSE}
 ## install packages if necessary
@@ -24,6 +31,8 @@ library(ggplot2)
 ```
 
 ### Get Data
+
+We are going to work with two datasets. They are associated with retail sales.
 
 [Data Set 1](https://data.world/retail/department-store-sales): Sales from the Retail Trade and Food Services Report from the US Census. This dataset only covers Department Stores, though the report covers a wide range of retail types. [1992-2016]
 
@@ -46,12 +55,17 @@ colnames(df2) <- df2[1,]
 
 ### Save Raw Data
 
+To be safe and not depend on the availability of the data on the Internet, better save it inside the project.
+
 ```{r save-data, warning=FALSE} 
 ## use saveRDS() to save each object as a .rds file 
-
+saveRDS(df1,'df_department.rds')
+saveRDS(df2,'df_retail.rds')
 ```
 
 ### Wrangle Data
+
+In the next code chunk, the data will be wrangle.
 
 ```{r wrangle-df2, warning=FALSE} 
 ## an example working with df2
@@ -78,28 +92,36 @@ df_retail <- df2 %>%
 ## work with df1
 df_department <- df1 %>% 
   ## split Period column into one column called "month" and one called "year"
-  function_name() %>%
+  separate(Period, into = c('month','year'), extra = 'drop', remove = FALSE) %>%
   ## add a column `value` which contains the 
   ## information from the `Value (in millions)` 
-  function_name() %>%
+  mutate(value = gsub("[…]|[.]","",`Value (in millions)`)) %>%
   ## group the data frame by the `year` column
-  function_name() %>%
+  group_by(year) %>%
   ## Summarize the data by creating a new column
   ## call this column `n` 
   ## have it contain the sum of the `value` column
-  function_name() %>% 
+  mutate(value=as.numeric(value)) %>% summarise(n=sum(value)) %>% 
   ### create a new column called `business`
   ## set the value of this column to  be "department stores" 
   ## for the entire data set 
-  function_name() %>%
+  mutate(business='department stores') %>%
   ## reorder column names to be : business, year, n
-  function_name()
+  select(business,year,n)
 ```
+
+#### Merge Data
+
+Here, we are going to merge the different datasets into a new one.
 
 ```{r merge-data, warning=FALSE} 
 ## Now, combine the two data frames
-df_total <- function_name()
+df_total <- merge(df_retail,df_department, all=TRUE)
 ```
+
+#### Ploting the data
+
+As an advance of later course, just run the next code chunk to plot some aspect of the data.
 
 ```{r plot, warning=FALSE, fig.width=10} 
 ## Plot Retail Sales data
@@ -114,3 +136,4 @@ ggplot(df_department, aes(x=year,y=n)) +
 ggplot(df_total, aes(x=year,y=as.numeric(n), colour=business)) +
   geom_point()
 ```
+
